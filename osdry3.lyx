@@ -1,0 +1,583 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass amsart
+\begin_preamble
+\usepackage{xcolor}
+\pagecolor[rgb]{0.15,0.15,0.15} %black
+\color[rgb]{1,1,1} %grey
+
+\newfontfamily\mylistingsfont{PT Mono}
+\definecolor{lbcolor}{rgb}{0.2,0.2,0.2}  
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1cm
+\topmargin 1cm
+\rightmargin 1cm
+\bottommargin 1.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip smallskip
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\size giant
+OS Dry 2
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\size large
+22/05/2021
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="1">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0pt">
+<row topspace="2cm">
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size huge
+Dani Bondar - 206560856
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row topspace="1cm">
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size huge
+Gur Telem - 206631848
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Question
+\end_layout
+
+\begin_layout Subsection
+Is the implementation valid?
+\end_layout
+
+\begin_layout Standard
+No.
+ Let's look at the following example with two threads running on two different
+ cores.
+\end_layout
+
+\begin_layout Standard
+Both threads start the function 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+sys_global_lock()
+\end_layout
+
+\end_inset
+
+ at the same time.
+ They both check the condition in the while loop at the same time and exit
+ the loop, now both received 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+global_lock
+\end_layout
+
+\end_inset
+
+ which is BAD.
+\end_layout
+
+\begin_layout Subsection
+Dani says the code is valid for a single core system.
+ Is he right?
+\end_layout
+
+\begin_layout Standard
+Ofc he's right.
+ Dani is planning on getting 100 on the exam.
+ Also, it would be weird is Dani said that Dani is wrong.
+ It's a paradox.
+\end_layout
+
+\begin_layout Standard
+Anyways, the kernel isn't preemptible and thus once the function 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+sys_global_lock
+\end_layout
+
+\end_inset
+
+ will start, it won't stop until it's done.
+ Meaning no other thread will be able to interfere between the time a lock
+ is checked and the time the 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+global_lock
+\end_layout
+
+\end_inset
+
+ is set to 
+\begin_inset Formula $1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Yosi checks the code on multicore.
+ Dani got stuck using a single core.
+ Why?
+\end_layout
+
+\begin_layout Standard
+First of all, the struct itself is copied into the function 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+spin_lock
+\end_layout
+
+\end_inset
+
+ so the lock isn't actually affected.
+ I assume that's a mistake in the assignment.
+\end_layout
+
+\begin_layout Standard
+When using a single core, after a lock was acquired, the user program started
+ running.
+ At some point (before the lock was released back), a context switch had
+ occurred and a second thread tried to acquire a lock.
+ Since there was another program with a lock, the 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+sys_global_lock
+\end_layout
+
+\end_inset
+
+ enters the 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+spin_lock
+\end_layout
+
+\end_inset
+
+.
+ But we only have a single core, and the kernel isn't preemptible, so it
+ stays forever trying to receive a lock using the 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+spin_lock
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Was Dani's computer going to get stuck as well if we used semaphores instead
+ of 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+spin_lock
+\end_layout
+
+\end_inset
+
+?
+\end_layout
+
+\begin_layout Standard
+It would solve the problem since the usage of semaphores will give up the
+ cpu willingly (which is possible) and will give a chance for the other
+ lock to be released.
+\end_layout
+
+\begin_layout Subsection
+Suggest an improvement
+\end_layout
+
+\begin_layout Standard
+First of all, this is not a valid lock.
+ As per my piazza post:
+\end_layout
+
+\begin_layout Standard
+Let's look at the following scenario:
+\end_layout
+
+\begin_layout Standard
+1.
+ Thread0 calls sys_global_lock() and acquires a lock.
+\end_layout
+
+\begin_layout Standard
+2.
+ Thread1 sys_global_lock() but fails because global_lock != 1 so it does
+ a 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+cond_wait
+\end_layout
+
+\end_inset
+
+ releasing m for the while.
+\end_layout
+
+\begin_layout Standard
+3.
+ Thread0 calls sys_global_unlock().
+ This acquires lock on m, releases the global_lock back to 0.
+ And the (???) send a 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+cond_signal
+\end_layout
+
+\end_inset
+
+ before releasing m.
+ This means that 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+cond_wait
+\end_layout
+
+\end_inset
+
+ will not unpause because it won't be able to acquire lock on m.
+\end_layout
+
+\begin_layout Standard
+This means that all threads that try to get a sys_global_lock will enter
+ a limbo.
+ Because a signal is only sent while m is locked so the 
+\begin_inset listings
+inline true
+status open
+
+\begin_layout Plain Layout
+
+cond_wait
+\end_layout
+
+\end_inset
+
+ will never resume.
+\end_layout
+
+\begin_layout Standard
+Do we get bonus points for noticing this?
+\end_layout
+
+\begin_layout Section
+Question
+\end_layout
+
+\begin_layout Subsection
+Why did Linus Torvald decided on non-preemptible kernel back in the start?
+\end_layout
+
+\begin_layout Standard
+On single core computer, the throughput was already limited, so the benefit
+ of making the kernel preemptible was worth risking the conveyer's effect.
+\end_layout
+
+\begin_layout Standard
+When using multiple cores, the throughput is much higher so paying the price
+ of possibly preempting the kernel, isn't so bad.
+\end_layout
+
+\begin_layout Standard
+Also, it's easier for locks to be acquired on a single core system if the
+ kernel is preemptible (even without a mutex, as we explained in question
+ 1).
+ This makes the kernel code much simpler and easier to follow (eliminating
+ completely the possibility of race conditions and such).
+\end_layout
+
+\begin_layout Subsection
+Which processes suffer the most from the non-preemptible policy?
+\end_layout
+
+\begin_layout Standard
+Interactive processes suffer more because non-preemptible means more possible
+ time waiting in queue (e.g.
+ conveyer's effect).
+ Responsiveness for this type is key.
+\end_layout
+
+\begin_layout Standard
+For computational processes, it matters less because responsiveness isn't
+ the key factor.
+\end_layout
+
+\begin_layout Subsection
+How long?
+\end_layout
+
+\begin_layout Standard
+There are 
+\begin_inset Formula $1024\cdot64\cdot8$
+\end_inset
+
+ bits in the buffer.
+ Each samples takes 
+\begin_inset Formula $16\cdot2=32$
+\end_inset
+
+ bits.
+ So this means 
+\begin_inset Formula $16384$
+\end_inset
+
+ samples.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $44.1$
+\end_inset
+
+KHz means that we send 
+\begin_inset Formula $44100$
+\end_inset
+
+ bits per second.
+\end_layout
+
+\begin_layout Standard
+Each sample is taking 
+\begin_inset Formula $\frac{32}{44100}\approx0.001$
+\end_inset
+
+ seconds.
+\end_layout
+
+\begin_layout Standard
+So if the buffer is 
+\begin_inset Formula $1024\cdot64\cdot8$
+\end_inset
+
+ bits, it would take 
+\begin_inset Formula $\frac{16384}{44100}\approx0.372$
+\end_inset
+
+ seconds for the buffer to empty.
+\end_layout
+
+\begin_layout Subsection
+What's the type of process is the player?
+\end_layout
+
+\begin_layout Standard
+Each second we read 
+\begin_inset Formula $\frac{1024\cdot64}{0.372}\approx1.344$
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+MiB.
+ Meaning that we only use 
+\begin_inset Formula $13.44$
+\end_inset
+
+% of the disk bandwidth.
+\end_layout
+
+\begin_layout Standard
+Regardless of these calculation, we need the process to fill up the buffer
+ for the music player at most, every 
+\begin_inset Formula $0.372$
+\end_inset
+
+ seconds.
+ Meaning, that if the process is sleeping for too long, there will be stutters.
+ Thus the process is more interactive than computational.
+\end_layout
+
+\begin_layout Standard
+As a rule of thumb, every process that interacts with a user 
+\series bold
+during
+\series default
+ its operation (music player, word processor, internet browser, etc...) are
+ interactive.
+ Processes that only show the user results at 
+\series bold
+the end
+\series default
+ are computational.
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_body
+\end_document
